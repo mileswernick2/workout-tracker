@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+
+<title>Daily Training</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f1114;
+    --surface: #1a1d22;
+    --surface2: #22262d;
+    --border: #2e333b;
+    --text: #e8e6e1;
+    --text2: #8a8d93;
+    --radius: 14px;
+    --safe-top: env(safe-area-inset-top, 20px);
+    --safe-bottom: env(safe-area-inset-bottom, 10px);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100dvh;
+    overflow-x: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .page { display: none; min-height: 100dvh; padding: calc(var(--safe-top) + 16px) 20px calc(var(--safe-bottom) + 20px); }
+  .page.active { display: flex; flex-direction: column; }
+
+  .landing-header { text-align: center; margin-bottom: 28px; padding-top: 12px; }
+  .landing-header h1 { font-size: 28px; font-weight: 700; letter-spacing: -0.5px; margin-bottom: 6px; }
+  .global-counter {
+    font-family: 'DM Mono', monospace; font-size: 14px; color: var(--text2);
+    background: var(--surface); display: inline-block; padding: 6px 16px; border-radius: 20px; margin-top: 8px;
+  }
+
+  .cat-group-label {
+    font-size: 11px; font-weight: 500; color: var(--text2);
+    text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; margin-top: 22px; padding-left: 4px;
+  }
+  .category-list { display: flex; flex-direction: column; gap: 10px; }
+
+  .cat-btn {
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 16px 18px; color: var(--text); font-family: 'DM Sans', sans-serif;
+    font-size: 16px; font-weight: 600; cursor: pointer;
+    transition: transform 0.15s, background 0.15s; -webkit-user-select: none;
+  }
+  .cat-btn:active { transform: scale(0.97); background: var(--surface2); }
+  .cat-btn .dot { width: 10px; height: 10px; border-radius: 50%; margin-right: 12px; flex-shrink: 0; }
+  .cat-btn .left { display: flex; align-items: center; }
+  .cat-btn .days { font-family: 'DM Mono', monospace; font-size: 13px; font-weight: 400; color: var(--text2); white-space: nowrap; }
+
+  .detail-header { display: flex; align-items: center; gap: 14px; margin-bottom: 20px; padding-top: 4px; }
+  .back-btn {
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    color: var(--text); font-size: 20px; width: 40px; height: 40px;
+    display: flex; align-items: center; justify-content: center; cursor: pointer; flex-shrink: 0;
+  }
+  .back-btn:active { background: var(--surface2); }
+  .detail-header h2 { font-size: 20px; font-weight: 700; }
+
+  .form-section {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 16px; margin-bottom: 12px; flex-grow: 1; overflow-y: auto;
+  }
+
+  label {
+    display: block; font-size: 12px; font-weight: 500; color: var(--text2);
+    text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 6px;
+  }
+
+  input, textarea {
+    width: 100%; background: var(--surface2); border: 1px solid var(--border); border-radius: 10px;
+    color: var(--text); font-family: 'DM Sans', sans-serif; font-size: 16px;
+    padding: 12px 14px; margin-bottom: 14px; outline: none; transition: border-color 0.2s;
+  }
+  input:focus, textarea:focus { border-color: #555; }
+  textarea { resize: none; min-height: 120px; line-height: 1.5; }
+
+  .checklist {
+    background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+    padding: 14px 16px; margin-bottom: 12px;
+  }
+  .checklist-title {
+    font-size: 11px; font-weight: 500; color: var(--text2);
+    text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 10px;
+  }
+  .check-row { display: flex; align-items: center; gap: 12px; padding: 8px 0; }
+  .check-row + .check-row { border-top: 1px solid var(--border); }
+  .check-row input[type="checkbox"] {
+    width: 20px; height: 20px; margin: 0; padding: 0; accent-color: #8bdb8b; flex-shrink: 0;
+  }
+  .check-row label {
+    font-size: 15px; font-weight: 400; color: var(--text);
+    text-transform: none; letter-spacing: 0; margin: 0;
+  }
+
+  .ex-header {
+    display: grid; grid-template-columns: 1fr 80px 80px; gap: 6px; margin-bottom: 6px;
+  }
+  .ex-header span {
+    font-size: 11px; font-weight: 500; color: var(--text2);
+    text-transform: uppercase; letter-spacing: 0.8px;
+  }
+  .ex-row {
+    display: grid; grid-template-columns: 1fr 80px 80px; gap: 6px; margin-bottom: 5px;
+  }
+  .ex-row input { margin-bottom: 0; padding: 10px 8px; font-size: 14px; }
+
+  .actions { display: flex; gap: 10px; margin-top: 6px; padding-bottom: 8px; }
+  .btn-save, .btn-history {
+    flex: 1; padding: 16px; border-radius: var(--radius); font-family: 'DM Sans', sans-serif;
+    font-size: 16px; font-weight: 600; border: none; cursor: pointer;
+    transition: transform 0.12s, opacity 0.12s;
+  }
+  .btn-save:active, .btn-history:active { transform: scale(0.97); opacity: 0.85; }
+  .btn-save { background: var(--text); color: var(--bg); }
+  .btn-history { background: var(--surface2); color: var(--text); border: 1px solid var(--border); }
+
+  .toast {
+    position: fixed; bottom: calc(var(--safe-bottom) + 24px);
+    left: 50%; transform: translateX(-50%) translateY(60px);
+    background: #2d3a2d; color: #8bdb8b; font-size: 15px; font-weight: 600;
+    padding: 12px 28px; border-radius: 30px; opacity: 0;
+    transition: transform 0.35s cubic-bezier(.22,1,.36,1), opacity 0.35s;
+    pointer-events: none; z-index: 100;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  .modal-overlay {
+    display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.7);
+    z-index: 50; align-items: flex-end; justify-content: center;
+  }
+  .modal-overlay.show { display: flex; }
+  .modal {
+    background: var(--surface); border-radius: 20px 20px 0 0; width: 100%;
+    max-height: 75dvh; padding: 20px 20px calc(var(--safe-bottom) + 20px);
+    overflow-y: auto; animation: slideUp 0.3s cubic-bezier(.22,1,.36,1);
+  }
+  @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+  .modal h3 { font-size: 18px; font-weight: 700; margin-bottom: 16px; text-align: center; }
+  .modal-close {
+    background: var(--surface2); border: 1px solid var(--border); border-radius: 10px;
+    color: var(--text); font-size: 15px; font-weight: 600; padding: 12px; width: 100%;
+    cursor: pointer; margin-top: 12px; font-family: 'DM Sans', sans-serif;
+  }
+
+  .hist-entry { background: var(--surface2); border-radius: 10px; padding: 14px; margin-bottom: 10px; }
+  .hist-date { font-family: 'DM Mono', monospace; font-size: 12px; color: var(--text2); margin-bottom: 8px; }
+  .hist-detail { font-size: 14px; line-height: 1.55; color: var(--text); }
+  .hist-detail span.hl { color: var(--text2); font-size: 12px; }
+  .hist-check { color: #8bdb8b; font-size: 13px; margin-bottom: 6px; }
+  .hist-none { text-align: center; color: var(--text2); font-size: 14px; padding: 30px 0; }
+</style>
+</head>
+<body>
+
+<div id="page-landing" class="page active">
+  <div class="landing-header">
+    <h1>Daily Training</h1>
+    <div class="global-counter" id="global-counter">Last workout: Never</div>
+  </div>
+  <div id="cat-list"></div>
+</div>
+
+<div id="page-detail" class="page">
+  <div class="detail-header">
+    <div class="back-btn" id="btn-back">←</div>
+    <h2 id="detail-title"></h2>
+  </div>
+  <div id="checklist-area"></div>
+  <div class="form-section" id="form-area"></div>
+  <div class="actions">
+    <button class="btn-history" id="btn-hist">History</button>
+    <button class="btn-save" id="btn-save">Save</button>
+  </div>
+</div>
+
+<div class="toast" id="toast">Saved ✓</div>
+
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal">
+    <h3 id="modal-title">History</h3>
+    <div id="modal-body"></div>
+    <button class="modal-close" id="modal-close">Close</button>
+  </div>
+</div>
+
+<script>
+const DAILY_CHECKS = [
+  'Shadow throwing',
+  'Eccentric wrist curls (3 orientations)',
+  'Toe ROM',
+  'Glute bridges',
+];
+
+const CATS = [
+  { id: 'running', name: 'Running', color: '#e07a4b', type: 'running', group: 'cardio' },
+  { id: 'biking', name: 'Biking', color: '#4b9fe0', type: 'freetext', group: 'cardio' },
+  { id: 'kayaking', name: 'Kayaking', color: '#4bc5a0', type: 'freetext', group: 'cardio' },
+  { id: 'pickleball', name: 'Pickleball', color: '#c5c04b', type: 'freetext', group: 'cardio' },
+  { id: 'day1', name: 'Day 1: Push + Pull', color: '#b04be0', type: 'exercises', group: 'strength',
+    hasChecklist: true, exercises: [
+      { name: 'Fist push-ups', h1: 'Sets', h2: 'Reps' },
+      { name: 'Dumbbell shoulder press', h1: 'Weight', h2: 'Reps' },
+      { name: 'Banded lat pulldowns', h1: 'Band/Sets', h2: 'Reps' },
+      { name: 'Banded rows', h1: 'Band/Sets', h2: 'Reps' },
+      { name: 'Australian rows', h1: 'Sets', h2: 'Reps' },
+      { name: 'Door-frame rows', h1: 'Sets', h2: 'Reps' },
+      { name: 'Band pull-aparts', h1: 'Band/Sets', h2: 'Reps' },
+    ]},
+  { id: 'day3', name: 'Day 3: Lower + Core + Ankle', color: '#e04b8c', type: 'exercises', group: 'strength',
+    hasChecklist: true, exercises: [
+      { name: 'Deep squat hold', h1: 'Sets', h2: 'Duration' },
+      { name: 'Bodyweight squats', h1: 'Sets', h2: 'Reps' },
+      { name: 'Wall sits', h1: 'Sets', h2: 'Duration' },
+      { name: 'Single-leg calf raises', h1: 'Sets', h2: 'Reps/side' },
+      { name: 'Dead bugs', h1: 'Sets', h2: 'Reps/side' },
+      { name: 'Bird-dogs', h1: 'Sets', h2: 'Reps/side' },
+      { name: 'Plank holds', h1: 'Sets', h2: 'Duration' },
+      { name: 'Banded eversion', h1: 'Sets', h2: 'Reps/side' },
+      { name: 'Banded inversion', h1: 'Sets', h2: 'Reps/side' },
+      { name: 'Heel walks', h1: 'Sets', h2: 'Lengths' },
+    ]},
+  { id: 'day5', name: 'Day 5: Shoulder + Balance + Grip', color: '#4b7be0', type: 'exercises', group: 'strength',
+    hasChecklist: true, exercises: [
+      { name: 'Active dead hangs', h1: 'Sets', h2: 'Duration' },
+      { name: 'Face pulls', h1: 'Band/Sets', h2: 'Reps' },
+      { name: 'Band pull-aparts', h1: 'Band/Sets', h2: 'Reps' },
+      { name: 'Banded serratus punches', h1: 'Band/Sets', h2: 'Reps' },
+      { name: 'Banded I/E rotation', h1: 'Band/Sets', h2: 'Reps/side' },
+      { name: 'Overcoming isometrics', h1: 'Sets', h2: 'Duration' },
+      { name: 'Single-leg stance', h1: 'Sets', h2: 'Duration/side' },
+      { name: 'Tandem walking', h1: 'Sets', h2: 'Lengths' },
+      { name: 'Suitcase carry', h1: 'Weight', h2: 'Duration/side' },
+      { name: 'Crimp holds', h1: 'Sets', h2: 'Duration' },
+    ]},
+  { id: 'mobility', name: 'Mobility', color: '#6bc5a0', type: 'exercises', group: 'strength',
+    hasChecklist: true, exercises: [
+      { name: 'Wall slides', h1: 'Sets', h2: 'Reps' },
+      { name: 'Doorway pec stretch', h1: 'Duration/side', h2: 'Notes' },
+      { name: 'Figure-four stretch', h1: 'Duration/side', h2: 'Notes' },
+      { name: 'Ankle circles', h1: 'Duration', h2: 'Notes' },
+      { name: 'Reverse wrist curls', h1: 'Weight', h2: 'Reps' },
+      { name: 'Finger extension', h1: 'Band/Sets', h2: 'Reps' },
+    ]},
+];
+
+const RUNNING_FIELDS = [
+  { key: 'intervals', label: 'Interval Description' },
+  { key: 'time', label: 'Time' },
+  { key: 'miles', label: 'Miles' },
+  { key: 'pace', label: 'Pace' },
+];
+
+let currentCat = null;
+
+function getLog(id) { try { return JSON.parse(localStorage.getItem('wt_' + id) || '[]'); } catch { return []; } }
+function saveLog(id, log) { localStorage.setItem('wt_' + id, JSON.stringify(log)); }
+function getLastEntry(id) { const l = getLog(id); return l.length ? l[l.length - 1] : null; }
+
+function daysAgo(ds) {
+  if (!ds) return null;
+  const d = new Date(ds + 'T00:00:00'), n = new Date();
+  return Math.floor((n.setHours(0,0,0,0) - d.setHours(0,0,0,0)) / 86400000);
+}
+function daysLabel(n) {
+  if (n === null) return 'Never';
+  if (n === 0) return 'Today';
+  if (n === 1) return '1 day ago';
+  return n + ' days ago';
+}
+
+function renderLanding() {
+  const container = document.getElementById('cat-list');
+  container.innerHTML = '';
+  let globalMin = null;
+
+  [
+    { label: 'Cardio & Sport', cats: CATS.filter(c => c.group === 'cardio') },
+    { label: 'Strength & Mobility', cats: CATS.filter(c => c.group === 'strength') },
+  ].forEach(g => {
+    const lbl = document.createElement('div');
+    lbl.className = 'cat-group-label';
+    lbl.textContent = g.label;
+    container.appendChild(lbl);
+
+    const list = document.createElement('div');
+    list.className = 'category-list';
+    g.cats.forEach(cat => {
+      const last = getLastEntry(cat.id);
+      const d = last ? daysAgo(last.date) : null;
+      if (d !== null && (globalMin === null || d < globalMin)) globalMin = d;
+      const btn = document.createElement('button');
+      btn.className = 'cat-btn';
+      btn.innerHTML = `<div class="left"><div class="dot" style="background:${cat.color}"></div>${cat.name}</div><span class="days">${daysLabel(d)}</span>`;
+      btn.addEventListener('click', () => openDetail(cat.id));
+      list.appendChild(btn);
+    });
+    container.appendChild(list);
+  });
+
+  document.getElementById('global-counter').textContent = 'Last workout: ' + daysLabel(globalMin);
+}
+
+function openDetail(catId) {
+  currentCat = CATS.find(c => c.id === catId);
+  const last = getLastEntry(catId);
+  document.getElementById('detail-title').textContent = currentCat.name;
+  const area = document.getElementById('form-area');
+  const checkArea = document.getElementById('checklist-area');
+  area.innerHTML = '';
+  checkArea.innerHTML = '';
+
+  if (currentCat.hasChecklist) {
+    let h = '<div class="checklist"><div class="checklist-title">Daily Maintenance</div>';
+    DAILY_CHECKS.forEach((item, i) => {
+      h += `<div class="check-row"><input type="checkbox" id="chk_${i}"><label for="chk_${i}">${item}</label></div>`;
+    });
+    h += '</div>';
+    checkArea.innerHTML = h;
+  }
+
+  if (currentCat.type === 'running') {
+    RUNNING_FIELDS.forEach(f => {
+      area.innerHTML += `<label>${f.label}</label><input type="text" id="f_${f.key}" value="${last && last.data[f.key] ? last.data[f.key] : ''}" inputmode="${f.key === 'miles' ? 'decimal' : 'text'}">`;
+    });
+  } else if (currentCat.type === 'freetext') {
+    area.innerHTML += `<label>Notes</label><textarea id="f_notes">${last && last.data.notes ? last.data.notes : ''}</textarea>`;
+  } else if (currentCat.type === 'exercises') {
+    const exList = currentCat.exercises;
+    area.innerHTML += `<div class="ex-header"><span>Exercise</span><span>Detail 1</span><span>Detail 2</span></div>`;
+    exList.forEach((ex, i) => {
+      const prev = last && last.data.rows && last.data.rows[i] ? last.data.rows[i] : {};
+      const nm = prev.name !== undefined ? prev.name : ex.name;
+      area.innerHTML += `<div class="ex-row"><input type="text" id="e_name_${i}" value="${nm}" placeholder="${ex.name}"><input type="text" id="e_d1_${i}" value="${prev.d1 || ''}" placeholder="${ex.h1}"><input type="text" id="e_d2_${i}" value="${prev.d2 || ''}" placeholder="${ex.h2}"></div>`;
+    });
+  }
+
+  document.getElementById('page-landing').classList.remove('active');
+  document.getElementById('page-detail').classList.add('active');
+}
+
+document.getElementById('btn-save').addEventListener('click', () => {
+  if (!currentCat) return;
+  const entry = { date: new Date().toISOString().slice(0, 10), data: {} };
+
+  if (currentCat.hasChecklist) {
+    entry.data.checks = [];
+    DAILY_CHECKS.forEach((item, i) => {
+      if (document.getElementById('chk_' + i).checked) entry.data.checks.push(item);
+    });
+  }
+
+  if (currentCat.type === 'running') {
+    RUNNING_FIELDS.forEach(f => { entry.data[f.key] = document.getElementById('f_' + f.key).value; });
+  } else if (currentCat.type === 'freetext') {
+    entry.data.notes = document.getElementById('f_notes').value;
+  } else if (currentCat.type === 'exercises') {
+    entry.data.rows = [];
+    currentCat.exercises.forEach((ex, i) => {
+      const name = document.getElementById('e_name_' + i).value;
+      const d1 = document.getElementById('e_d1_' + i).value;
+      const d2 = document.getElementById('e_d2_' + i).value;
+      entry.data.rows.push({ name, d1, d2 });
+    });
+  }
+
+  const log = getLog(currentCat.id);
+  log.push(entry);
+  saveLog(currentCat.id, log);
+
+  const toast = document.getElementById('toast');
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 1800);
+});
+
+document.getElementById('btn-back').addEventListener('click', () => {
+  document.getElementById('page-detail').classList.remove('active');
+  document.getElementById('page-landing').classList.add('active');
+  renderLanding();
+});
+
+document.getElementById('btn-hist').addEventListener('click', () => {
+  if (!currentCat) return;
+  const log = getLog(currentCat.id);
+  const body = document.getElementById('modal-body');
+  document.getElementById('modal-title').textContent = currentCat.name + ' History';
+  body.innerHTML = '';
+
+  if (!log.length) {
+    body.innerHTML = '<div class="hist-none">No entries yet</div>';
+  } else {
+    log.slice().reverse().slice(0, 30).forEach(e => {
+      const div = document.createElement('div');
+      div.className = 'hist-entry';
+      let detail = '';
+
+      if (e.data.checks && e.data.checks.length) {
+        detail += '<div class="hist-check">✓ ' + e.data.checks.join(' · ') + '</div>';
+      }
+
+      if (currentCat.type === 'running') {
+        RUNNING_FIELDS.forEach(f => {
+          if (e.data[f.key]) detail += `<span class="hl">${f.label}:</span> ${e.data[f.key]}<br>`;
+        });
+      } else if (currentCat.type === 'freetext') {
+        detail += (e.data.notes || '').replace(/\n/g, '<br>');
+      } else if (currentCat.type === 'exercises') {
+        (e.data.rows || []).forEach(r => {
+          if (r.name && (r.d1 || r.d2)) detail += `${r.name} — ${r.d1 || '—'} / ${r.d2 || '—'}<br>`;
+        });
+      }
+      div.innerHTML = `<div class="hist-date">${e.date}</div><div class="hist-detail">${detail || '<em style="color:var(--text2)">Empty</em>'}</div>`;
+      body.appendChild(div);
+    });
+  }
+
+  document.getElementById('modal-overlay').classList.add('show');
+});
+
+document.getElementById('modal-close').addEventListener('click', () => {
+  document.getElementById('modal-overlay').classList.remove('show');
+});
+document.getElementById('modal-overlay').addEventListener('click', (e) => {
+  if (e.target === e.currentTarget) document.getElementById('modal-overlay').classList.remove('show');
+});
+
+renderLanding();
+</script>
+</body>
+</html>
